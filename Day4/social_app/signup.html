@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Social App</title>
+        <link rel="icon" href="assets/lion_icon.jpg">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main class="ui-main-content ui-flex ui-align-stretch">
+        <div class="ui-signup-image"></div>
+        <form class="ui-signup-form ui-flex ui-align-center">
+            <h1 class="ui-form-title">Sign up form</h1>
+            <div class="ui-sub-content ui-flex ui-align-center">
+            <label for="username">Name</label>
+            <input type="text" name="username" minlength="2" required>
+            </div>
+            <div class="ui-sub-content ui-flex ui-align-center">
+            <label for="useremail">Email</label>
+            <input type="email" name="useremail" pattern="^[a-zA-Z0-9_\-\.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}$" required>
+                                                 
+            </div>
+            <div class="ui-sub-content ui-flex ui-align-center">
+            <label for="usermobilenum">Mobile No</label>
+            <input type="tel" name="usermobilenum" pattern="[0-9]{10}" placeholder="10 digit number"  required>
+            </div>
+            <div class="ui-sub-content ui-flex ui-align-center">
+            <label for="dateofbirth">Date of birth</label>
+            <input type="date" name="dateofbirth" required>
+            </div>
+            <div class="ui-sub-content ui-flex ui-align-center">
+            <label>Gender</label>
+            <select name="gender" required>
+                <option value="" hidden>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            </div>
+            <div class="ui-sub-content ui-button-actions ui-flex ui-justify-space-between">
+                <button class="ui-button ui-submit">Sign Up</button>
+                <button type="reset" class="ui-button ui-reset">Reset</button>
+            </div>
+        </form>
+        </main>
+    </body>
+</html>

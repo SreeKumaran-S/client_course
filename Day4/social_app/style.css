@@ -1,0 +1,109 @@
+.ui-flex{
+    display: flex;
+    justify-content: center;
+}
+
+.ui-align-stretch{
+     align-items: stretch; 
+}
+.ui-align-center{
+    align-items: center;
+}
+.ui-justify-end{
+    justify-content: flex-end;
+}
+.ui-justify-start{
+    justify-content: flex-start;
+}
+.ui-justify-space-between{
+    justify-content: space-between;
+}
+
+body{
+    background: rgb(97 116 133);
+}
+
+
+.ui-main-content{
+    padding:10px;
+    background-color: rgba(144, 197, 210, 0.657);
+    height: fit-content;
+    width:800px;
+    gap:5px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ui-signup-image{
+    flex:1;
+    background:url("assets/loading.gif") no-repeat center/cover;
+    border-radius:10px;
+}
+.ui-signup-form{
+    flex:1;
+    border:1px solid black;
+    border-radius:10px;
+    padding:10px;
+    flex-direction: column;
+    gap:40px;
+    width:500px;
+   
+}
+.ui-sub-content{
+    width:400px;
+    margin-bottom: 10px;
+    label{
+        width:100px;
+        font-weight:500;
+        font-size:18px;
+        margin-right:30px
+    }
+    input, select{
+       flex:1;
+       padding: 8px;
+       border: 3px solid #ccc;
+       border-radius: 5px;
+       outline: none;
+    }
+}
+.ui-form-title{
+    text-decoration: underline;
+}
+.ui-button{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width:70px;
+} 
+.ui-button-actions{
+    gap:132px;
+}
+.ui-submit{
+    background-color:blanchedalmond;
+    cursor:not-allowed;
+    transition: width 0.5s ease-in-out;
+    pointer-events: none;
+}
+.ui-reset{
+    background-color: salmon;
+    cursor: pointer;
+}
+
+
+input:valid, select:valid{
+    border-color: green;
+}
+
+input:focus:invalid, select:focus:invalid {
+    border-color: red;
+}
+
+.ui-signup-form:valid .ui-submit {
+    background-color: #a2ffa2;
+    cursor: pointer;
+    pointer-events: auto;
+    width: 110px;
+}
+
