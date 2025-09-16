@@ -30,10 +30,10 @@ body{
     height: fit-content;
     width:800px;
     gap:5px;
-    position: absolute;
+    /* position:absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);  */
 }
 
 .ui-signup-image{
@@ -76,6 +76,8 @@ body{
     border: 1px solid #ccc;
     border-radius: 5px;
     width:70px;
+    cursor: pointer;
+    font-weight: bold;
 } 
 .ui-button-actions{
     gap:132px;
@@ -93,7 +95,7 @@ body{
 
 
 input:valid, select:valid{
-    border-color: green;
+    border-color: rgb(70, 206, 120);
 }
 
 input:focus:invalid, select:focus:invalid {
@@ -106,4 +108,47 @@ input:focus:invalid, select:focus:invalid {
     pointer-events: auto;
     width: 110px;
 }
+.ui-users-data-table{
+    margin-top:30px;
+}
+.ui-users-table {
+    width:900px;
+    border-collapse: collapse;
+    background-color: rgb(40, 192, 197);
+    text-align: center;
+    th, td{
+        border:1px solid black;
+        padding:20px;
+        min-width:150px;
+        max-width:150px;
+        white-space: nowrap; 
+        overflow:scroll; 
+        outline: none;
+    }
+    td[contenteditable="true"]:focus {
+       color: rgb(30, 25, 23);
+       font-weight: bold;
+       background-color: rgba(9, 241, 140, 0.507);
+    }
+    caption{
+        background-color: rgb(40, 192, 197);
+        padding:10px;
+        font-weight: bold;
+        font-size:25px;
+    }
+}
+.ui-crud-container{
+    flex-direction: column;
+    align-items: center;
+}
+.ui-table-btn{
+    background-color: beige;
+    font-weight: bold;
+}
+.ui-table-btn[value="OFF"], .ui-table-btn[value="delete"]:active{
+    background-color: salmon;
+}
 
+.ui-table-btn[value="ON"], .ui-table-btn[value="update"]:active{
+    background-color: rgb(70, 206, 120);
+}
