@@ -1,43 +1,16 @@
 (function () {
 
-    let users_data = [
-        {
-            "id": 0,
-            "userName": "sree",
-            "userEmail": "sreemass@example.com",
-            "userMobile": "+919988776654",
-            "userDOB": "2025-09-02",
-            "userGender": "male"
-        },
-        {
-            "id": 1,
-            "userName": "john",
-            "userEmail": "john.doe@example.com",
-            "userMobile": "+919876543210",
-            "userDOB": "1990-05-15",
-            "userGender": "male"
-        },
-        {
-            "id": 2,
-            "userName": "jane",
-            "userEmail": "jane.smith@example.com",
-            "userMobile": "+918123456789",
-            "userDOB": "1995-12-22",
-            "userGender": "female"
-        },
-        {
-            "id": 3,
-            "userName": "alex",
-            "userEmail": "alex.williams@example.com",
-            "userMobile": "+917654321098",
-            "userDOB": "1988-07-10",
-            "userGender": "male"
-        }
-    ];
-
+    window.users_data = [];
+    let currentPageNo = 0;
+    let limit = 5;
+    let isFetching = false;
+    let isDataAvailableToFetch = true;
 
     document.addEventListener("DOMContentLoaded", function () {
-        renderUsers();
+
+        fetchUsers(0);
+        setPaginationHandlerForUsers();
+
         let signup_form = document.querySelector("#signup_form");
         let username = signup_form.querySelector('input[name="username"]');
         let useremail = signup_form.querySelector('input[name="useremail"]');
@@ -58,7 +31,8 @@
 
             if (validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val)) {
                 let newUser = {};
-                newUser['id'] = users_data.length;
+
+                newUser['id'] = crypto.randomUUID();
                 newUser['userName'] = username_val;
                 newUser['userEmail'] = useremail_val;
                 newUser['userMobile'] = usermobilenum_val;
@@ -66,12 +40,22 @@
                 newUser['userGender'] = usergender_val;
 
                 users_data.push(newUser);
-                renderUsers();
+
+                let callback = {
+                    success: (resp) => {
+                        showNotification("User data created successfully", "ui-info");
+                        console.log(resp);
+                        fetchUsers(0);
+                    },
+                    error: (err) => {
+                        showNotification("Error occured in sign up", "ui-error");
+                        console.log(err);
+                    }
+                }
+                addUserInDb(callback, newUser);                 // Create operation
+
                 this.reset();
 
-            }
-            else {
-               alert("Kindly recheck your data");
             }
         });
     });
@@ -100,9 +84,9 @@
                     <td contenteditable="false" data="userMobile">${user.userMobile}</td>
                     <td contenteditable="false" data="userDOB">${user.userDOB}</td>
                     <td contenteditable="false" data="userGender">${user.userGender}</td>
-                    <td ><button id="toggleButton" class="ui-table-btn ui-button"onclick = "toggleEditMode(event, ${index})" value="OFF">OFF</button>
-                    <td><button class="ui-table-btn ui-button" onclick = "deleteUser(event, ${index})" value="delete">Delete</button>
-                        <button class="ui-table-btn ui-button" onclick = "updateUser(event, ${index})" value="update">Update</button>
+                    <td ><button id="toggleButton" class="ui-table-btn ui-button"onclick = "toggleEditMode(event, '${user.id}')" value="OFF">OFF</button>
+                    <td><button class="ui-table-btn ui-button" onclick = "deleteUser(event, '${user.id}')" value="delete">Delete</button>
+                        <button class="ui-table-btn ui-button" onclick = "updateUser(event, '${user.id}')" value="update">Update</button>
                     </td>
                 </tr>`;
             })
@@ -112,11 +96,29 @@
         usersContainer.innerHTML = html;
     }
     function validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val) {
-        return (
-            validateName(username_val) && validateEmail(useremail_val) &&
-            validateMobile(usermobilenum_val) && validateDOB(userdateofbirth_val) &&
-            validateGender(usergender_val)
-        );
+        let validateFields = {
+            name: validateName(username_val),
+            email: validateEmail(useremail_val),
+            mobile: validateMobile(usermobilenum_val),
+            dob: validateDOB(userdateofbirth_val),
+            gender: validateGender(usergender_val)
+        };
+
+
+        let incorrectDataMessage = "";
+        for (let key in validateFields) {
+            if (!validateFields[key]) {
+                incorrectDataMessage = incorrectDataMessage.concat(key + "\n");
+            }
+        }
+        if (incorrectDataMessage.length > 0) {
+            incorrectDataMessage = `Recheck these incorrect fields \n${incorrectDataMessage}`;
+            showNotification(incorrectDataMessage, ["ui-warn", "ui-invalid-fields"]);
+        }
+        else {
+            return true;
+        }
+
     }
 
     function validateName(userName) {
@@ -127,7 +129,7 @@
         return regexPattern.test(userEmail);
     }
     function validateMobile(userMobile) {
-        let regexPattern = /^\+91[6-9][0-9]{9}$/;
+        let regexPattern = /^\+91\s?[6-9][0-9]{9}$/;
         return regexPattern.test(userMobile);
     }
     function validateGender(userGender) {
@@ -145,19 +147,6 @@
         dobInput.setAttribute('max', today);
     }
 
-    window.deleteUser = function (event, idOfUserToRemove) {
-        let targetRow = event.currentTarget.closest("tr");
-        let isNotInEditMode = targetRow.querySelector("#toggleButton").value === 'OFF';
-        if(isNotInEditMode){
-            alert("Kindly enable edit mode ON to perform the operation");
-            return;
-        }
-        targetRow.remove();
-        users_data = users_data.filter(user => user.id !== idOfUserToRemove);
-        if (users_data.length == 0) {
-            renderUsers();
-        }
-    }
     window.toggleEditMode = function (event, idOfUserToToggleEdit) {
         let targetRow = event.currentTarget.closest("tr");
         let targetButton = event.currentTarget;
@@ -178,36 +167,112 @@
         targetButton.textContent = newEditState;
     }
 
+    window.deleteUser = function (event, idOfUserToRemove) {
+        let targetRow = event.currentTarget.closest("tr");
+        let isNotInEditMode = targetRow.querySelector("#toggleButton").value === 'OFF';
+        if (isNotInEditMode) {
+            showNotification("Kindly enable edit mode ON to perform the operation", "ui-warn");
+            return;
+        }
+        targetRow.remove();
+        users_data = users_data.filter(user => user.id != idOfUserToRemove);
+
+        let callback = {
+            success: (resp) => {
+                showNotification("Wipped your data in db", "ui-info");
+                fetchUsers(0);
+                console.log("Updated list: ");
+                users_data.forEach((item) => {
+                    console.log(item);
+                });
+            },
+            error: (err) => {
+                showNotification("Error occured in deletion", "ui-error");
+                console.log(err);
+            }
+        };
+        deleteUserInDb(callback, idOfUserToRemove);     // Delete operation
+    }
     window.updateUser = function (event, idOfUserToUpdate) {
         let targetRow = event.currentTarget.closest("tr");
         let tableData = targetRow.querySelectorAll('td');
         let isNotInEditMode = targetRow.querySelector("#toggleButton").value === 'OFF';
 
-        if(isNotInEditMode){
-            alert("Kindly enable edit mode ON to perform the operation");
+        if (isNotInEditMode) {
+            showNotification("Kindly enable edit mode ON to perform the operation", "ui-warn");
             return;
         }
         let updateUser = {};
 
         tableData.forEach(element => {
-            if (element.hasAttribute('contenteditable')){
+            if (element.hasAttribute('contenteditable')) {
                 let key = element.getAttribute('data');
                 let value = element.textContent.trim();
                 updateUser[key] = value;
+
             }
         });
         let valuesArray = Object.values(updateUser);
         if (validateUserData(...valuesArray)) {
-            let storeIndex = users_data.findIndex(user => user.id === idOfUserToUpdate);
-            users_data[storeIndex] = Object.assign({}, users_data[storeIndex], updateUser );
-            alert("Yaay !! updated your data")
+            let storeIndex = users_data.findIndex(user => user.id == idOfUserToUpdate);
+            users_data[storeIndex] = Object.assign({}, users_data[storeIndex], updateUser);
+
+            let callback = {
+                success: (resp) => {
+                    console.log(resp);
+                    showNotification("Yaay updated your data in db !!", "ui-info");
+                },
+                error: (err) => {
+                    showNotification("Error occured in updation", "ui-error");
+                    console.log(err);
+                }
+            };
+
+            updateUserInDb(callback, idOfUserToUpdate, updateUser);     // Update operation
+
         }
-        else {
-            alert("Kindly recheck your data");
-        }
+    
         console.log("Store Data: ");
         users_data.forEach((item) => {
             console.log(item);
         });
     }
+
+    window.fetchUsers = (pageNo) => {            // Read operation
+        let callback = {
+            success: (resp) => {
+                if(pageNo == 0){
+                    users_data = resp;
+                }
+                else{
+                    users_data.push(...resp);
+                }
+               
+                renderUsers();
+                isFetching = false;
+                isDataAvailableToFetch = resp.length == limit ;
+            },
+            error: (err) => {
+                showNotification("Error occured in fetching", "ui-error");
+                console.log(err);
+            }
+        }
+        let data = {
+            _start: pageNo * limit,
+            _limit: limit
+        };
+        getUsersInDb(callback, data);
+        currentPageNo = pageNo;
+    }
+
+    window.setPaginationHandlerForUsers = () => {                                   // pagination handler
+        window.addEventListener("scroll", () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                if(isDataAvailableToFetch && !isFetching ){
+                    fetchUsers(currentPageNo + 1);
+                }
+            }
+        });
+    }
+
 })();

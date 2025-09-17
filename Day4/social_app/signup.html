@@ -13,24 +13,24 @@
             <h1 class="ui-form-title">Sign up form</h1>
             <div class="ui-sub-content ui-flex ui-align-center">
             <label for="username">Name</label>
-            <input type="text" name="username" minlength="2" required>
+            <input type="text" name="username" >
             </div>
             <div class="ui-sub-content ui-flex ui-align-center">
             <label for="useremail">Email</label>
-            <input type="email" name="useremail" pattern="^[a-zA-Z0-9_\-\.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}$" required>
+            <input type="text" name="useremail"  >
                                                  
             </div>
             <div class="ui-sub-content ui-flex ui-align-center">
             <label for="usermobilenum">Mobile No</label>
-            <input type="tel" name="usermobilenum" pattern="^\+91[6-9][0-9]{9}$" placeholder="+91 10 digit number"  required>
+            <input type="tel" name="usermobilenum" placeholder="+91 10 digit number" >
             </div>
             <div class="ui-sub-content ui-flex ui-align-center">
             <label for="userdateofbirth">Date of birth</label>
-            <input type="date" name="userdateofbirth" required>
+            <input type="date" name="userdateofbirth" >
             </div>
             <div class="ui-sub-content ui-flex ui-align-center">
             <label>Gender</label>
-            <select name="usergender" required>
+            <select name="usergender" >
                 <option value="" hidden>Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -45,6 +45,10 @@
         </main>
        <div id="usersContainer" class="ui-users-data-table"></div>
        </div>
-        <script src="index.js" defer></script>
+        
+        <div id="notification" class="ui-notification"></div>
+        <script src="notification.js" defer></script>
+        <script src="request.js" defer></script>
+        <script src="index.js" defer></script>  
     </body>
 </html>
