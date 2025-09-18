@@ -4,6 +4,7 @@
     let currentPageNo = 0;
     let limit = 5;
     let isFetching = false;
+    let prefetchHeightBefore = 100;
     let isDataAvailableToFetch = true;
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -239,6 +240,7 @@
     }
 
     window.fetchUsers = (pageNo) => {            // Read operation
+        isFetching = true;
         let callback = {
             success: (resp) => {
                 if(pageNo == 0){
@@ -267,7 +269,7 @@
 
     window.setPaginationHandlerForUsers = () => {                                   // pagination handler
         window.addEventListener("scroll", () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - prefetchHeightBefore) {
                 if(isDataAvailableToFetch && !isFetching ){
                     fetchUsers(currentPageNo + 1);
                 }
