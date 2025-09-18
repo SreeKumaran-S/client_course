@@ -38,7 +38,7 @@ body{
 
 .ui-signup-image{
     flex:1;
-    background:url("assets/loading.gif") no-repeat center/cover;
+    background:url("assets/signup_asset.jpeg") no-repeat center/cover;
     border-radius:10px;
 }
 .ui-signup-form{
