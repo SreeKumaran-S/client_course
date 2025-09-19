@@ -1,23 +1,24 @@
-let getUsersInDb = function (callback, data) {
+export let getUsersInDb = function (callback, data) {
     let url = "http://localhost:4000/users_data";
     makeRequest('GET', url, callback, data);
 };
 
-let addUserInDb = function (callback, data) {
+export let addUserInDb = function (callback, data) {
     let url = "http://localhost:4000/users_data";
     makeRequest('POST', url, callback, data);
 };
-let updateUserInDb = function (callback, id, data) {
+
+export let updateUserInDb = function (callback, id, data) {
     let url = `http://localhost:4000/users_data/${id}`;
     makeRequest('PUT', url, callback, data);
 };
 
-let deleteUserInDb = function (callback, id) {
+export let deleteUserInDb = function (callback, id) {
     let url = `http://localhost:4000/users_data/${id}`;
     makeRequest('DELETE', url, callback);
 };
 
-let makeRequest = function (method, url, callback, data) {
+export let makeRequest = function (method, url, callback, data) {
     sendHTTPRequest(method, url, data)
         .then(response => {
             callback.success(response);
