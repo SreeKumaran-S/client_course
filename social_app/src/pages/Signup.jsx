@@ -1,15 +1,19 @@
 import '../styles/style.css';
+import { nameChange} from "../actions/signupActions";
+import useSign from '../hooks/useSign'
 
 function Signup(){
+    let {value, dispatch} = useSign();
     return (
         <div className="ui-crud-container ui-flex">
+            <div>Your name is {value}</div>
         <main className="ui-main-content ui-flex ">
         <div className="ui-signup-image ui-align-stretch"></div>
         <form id="signup_form" className="ui-signup-form ui-flex ui-align-center">
             <h1 className="ui-form-title">Sign up form</h1>
             <div className="ui-sub-content ui-flex ui-align-center">
             <label htmlFor="username">Name</label>
-            <input type="text" name="username" />
+            <input type="text" name="username" onChange= {(e)=>dispatch(nameChange(e.target.value))} />
             </div>
             <div className="ui-sub-content ui-flex ui-align-center">
             <label htmlFor="useremail">Email</label>
