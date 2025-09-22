@@ -184,3 +184,7 @@ input:focus:invalid, select:focus:invalid {
     font-size:17px;
     text-decoration: underline;
 }
+
+.margin-right-10{
+    margin-right:10px;
+}

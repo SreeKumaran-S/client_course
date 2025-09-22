@@ -29,7 +29,7 @@ export default function UsersTable({users_data, onToggleEdit, onDelete, onUpdate
                             {user.isEditing ? 'ON' : 'OFF'}
                         </button>
                     </td>
-                    <td><button className={`ui-table-btn ui-button ui-cell-delete ${user.isEditing ? 'on' : 'off'}`} onClick = {(e)=> onDelete(e, user.id, user.isEditing)} >Delete</button>
+                    <td><button className={`ui-table-btn ui-button ui-cell-delete margin-right-10 ${user.isEditing ? 'on' : 'off'}`} onClick = {(e)=> onDelete(e, user.id, user.isEditing)} >Delete</button>
                         <button className={`ui-table-btn ui-button ui-cell-update ${user.isEditing ? 'on' : 'off'}`} onClick = {(e)=> onUpdate(e, user.id, user.isEditing)} >Update</button>
                     </td>
                 </tr>
