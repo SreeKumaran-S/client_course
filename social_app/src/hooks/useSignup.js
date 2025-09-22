@@ -5,7 +5,20 @@ import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode 
 import { useNotification } from '../context/NotificationContext';
 
 function useSignup() {
+    
+    useEffect(() => {
+        fetchUsers(0);                  // 1st-fetch
+        let handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - signupConfig.current.prefetchHeightBefore) {
+                if (signupConfig.current.isDataAvailableToFetch && !isFetching) {
+                    fetchUsers(signupConfig.current.currentPageNo + 1);
+                }
+            }
+        };
 
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
     let users = useSelector((state) => state.usersState.users);
     let dispatch = useDispatch();
     let { notify } = useNotification();
@@ -58,7 +71,7 @@ function useSignup() {
         return !!userName?.length;
     }
     function validateEmail(userEmail) {
-        let regexPattern = /[a-zA-Z0-9_\-\.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}$/;
+        let regexPattern = /[a-zA-Z0-9_\-.]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/;
         return regexPattern.test(userEmail);
     }
     function validateMobile(userMobile) {
@@ -184,7 +197,7 @@ function useSignup() {
         setIsFetching(true);
         let callback = {
             success: (resp) => {
-                if (pageNo == 0) {
+                if (pageNo === 0) {
                     dispatch(setUsers(resp));
                 }
                 else {
@@ -208,20 +221,6 @@ function useSignup() {
         };
         getUsersInDb(callback, data);
     }
-
-    useEffect(() => {
-        fetchUsers(0);                  // 1st-fetch
-        let handleScroll = () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - signupConfig.current.prefetchHeightBefore) {
-                if (signupConfig.current.isDataAvailableToFetch && !isFetching) {
-                    fetchUsers(signupConfig.current.currentPageNo + 1);
-                }
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
 
     let formElements = [
         {

@@ -32,7 +32,7 @@ export let makeRequest = function (method, url, callback, data) {
 let sendHTTPRequest = (method, url, data = null) => {
     return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
-        if ((method == 'GET' || method == 'DELETE') && data) {
+        if ((method === 'GET' || method === 'DELETE') && data) {
             let queryParams = new URLSearchParams(data).toString();
             url += '?' + queryParams;
         }

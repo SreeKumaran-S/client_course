@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Signup from './pages/Signup.jsx';
+import Signup from './pages/Signup';
 import { Provider } from "react-redux";
 import store from "./store/store";
 import NotificationProvider from "./context/NotificationContext";

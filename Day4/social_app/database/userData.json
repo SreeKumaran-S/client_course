@@ -151,22 +151,6 @@
       "userDOB": "1994-05-05",
       "userGender": "female",
       "id": "ee1a836e-f3ab-4a4f-bd7d-e7dbbf43c1c9"
-    },
-    {
-      "id": "78f767e7-d1da-476b-b050-38a19ade61bb",
-      "userName": "asdf",
-      "userEmail": "asdf@asdf.com",
-      "userMobile": "+919514902393",
-      "userDOB": "2025-09-09",
-      "userGender": "male"
-    },
-    {
-      "id": "cd29e75d-506c-493f-a966-c49c830159ca",
-      "userName": "asdf",
-      "userEmail": "asdf@asdf.com",
-      "userMobile": "+919514902393",
-      "userDOB": "2025-09-04",
-      "userGender": "male"
     }
   ]
 }
