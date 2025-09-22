@@ -1,22 +1,28 @@
-let showNotification = function (message, types) {
-    let notification = document.getElementById('notification');
+import {useState, useEffect} from 'react';
 
-    notification.textContent = message;
-    notification.classList.add('show');
+export default function Notification({ message, types, duration = 2000, onClose}) {
+    let [show, setShow] = useState(false);
+    useEffect(() => {
+        if (message) {
+            setShow(true);
+            let timer = setTimeout(() => {
+                setShow(false);
+                onClose(); 
+            }, duration);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [message, duration, onClose]);
 
-    if (Array.isArray(types)) {
-        notification.classList.add(...types);
-    } else if (typeof types === 'string') {
-        notification.classList.add(types);
+
+    if (!message) {
+        return null;
     }
+    let typeClasses = Array.isArray(types) ? types.join(" ") : types || "";
 
-    setTimeout(() => {
-        notification.classList.remove('show');
-        
-        if (Array.isArray(types)) {
-            notification.classList.remove(...types);
-        } else if (typeof types === 'string') {
-            notification.classList.remove(types);
-        }     
-    }, 2000);
+    return (
+        <div className={`ui-notification ${show ? "show" : ""} ${typeClasses}`}>
+            {message}
+        </div>
+    );
 }

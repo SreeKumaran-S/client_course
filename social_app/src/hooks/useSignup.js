@@ -1,101 +1,32 @@
-(function () {
+import { useSelector, useDispatch } from 'react-redux';
+import { useState, useEffect, useRef } from 'react';
+import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
+import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
+import { useNotification } from '../context/NotificationContext';
 
-    window.users_data = [];
-    let currentPageNo = 0;
-    let limit = 5;
-    let isFetching = false;
-    let prefetchHeightBefore = 100;
-    let isDataAvailableToFetch = true;
+function useSignup() {
 
-    document.addEventListener("DOMContentLoaded", function () {
-
-        fetchUsers(0);
-        setPaginationHandlerForUsers();
-
-        let signup_form = document.querySelector("#signup_form");
-        let username = signup_form.querySelector('input[name="username"]');
-        let useremail = signup_form.querySelector('input[name="useremail"]');
-        let usermobilenum = signup_form.querySelector('input[name="usermobilenum"]');
-        let userdateofbirth = signup_form.querySelector('input[name="userdateofbirth"]');
-        let usergender = signup_form.querySelector('select[name="usergender"]');
-        this.usersContainer = document.getElementById('usersContainer');
-
-        setMaxDate(userdateofbirth);
-
-        signup_form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            let username_val = username.value.trim();
-            let useremail_val = useremail.value.trim();
-            let usermobilenum_val = usermobilenum.value.trim();
-            let userdateofbirth_val = userdateofbirth.value;
-            let usergender_val = usergender.value;
-
-            if (validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val)) {
-                let newUser = {};
-
-                newUser['id'] = crypto.randomUUID();
-                newUser['userName'] = username_val;
-                newUser['userEmail'] = useremail_val;
-                newUser['userMobile'] = usermobilenum_val;
-                newUser['userDOB'] = userdateofbirth_val;
-                newUser['userGender'] = usergender_val;
-
-                users_data.push(newUser);
-
-                let callback = {
-                    success: (resp) => {
-                        showNotification("User data created successfully", "ui-info");
-                        console.log(resp);
-                        fetchUsers(0);
-                    },
-                    error: (err) => {
-                        showNotification("Error occured in sign up", "ui-error");
-                        console.log(err);
-                    }
-                }
-                addUserInDb(callback, newUser);                 // Create operation
-
-                this.reset();
-
-            }
-        });
+    let users = useSelector((state) => state.usersState.users);
+    let dispatch = useDispatch();
+    let { notify } = useNotification();
+    let [isFetching, setIsFetching] = useState(false);
+    let signupConfig = useRef({
+        currentPageNo: 0,
+        limit: 5,
+        prefetchHeightBefore: 100,
+        isDataAvailableToFetch: true
     });
 
-    function renderUsers() {
-        let html = `<table class="ui-users-table">
-                <caption>Users Data</caption>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Mobile</th>
-                        <th>DOB</th>
-                        <th>Gender</th>
-                        <th>Edit Mode</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+    const initialFormData = {
+        username_val: "",
+        useremail_val: "",
+        usermobilenum_val: "",
+        userdateofbirth_val: "",
+        usergender_val: ""
+    };
+    let [userFormData, setUserFormData] = useState(initialFormData);
+    let [editingUsers, setEditingUsers] = useState({});
 
-        users_data.length > 0
-            ? users_data.map((user, index) => {
-                html += `<tr>
-                    <td contenteditable="false" data="userName">${user.userName}</td>
-                    <td contenteditable="false" data="userEmail">${user.userEmail}</td>
-                    <td contenteditable="false" data="userMobile">${user.userMobile}</td>
-                    <td contenteditable="false" data="userDOB">${user.userDOB}</td>
-                    <td contenteditable="false" data="userGender">${user.userGender}</td>
-                    <td ><button id="toggleButton" class="ui-table-btn ui-button"onclick = "toggleEditMode(event, '${user.id}')" value="OFF">OFF</button>
-                    <td><button class="ui-table-btn ui-button" onclick = "deleteUser(event, '${user.id}')" value="delete">Delete</button>
-                        <button class="ui-table-btn ui-button" onclick = "updateUser(event, '${user.id}')" value="update">Update</button>
-                    </td>
-                </tr>`;
-            })
-            : html += `<tr><td colspan="7" align="center">No data found</td></tr>`;
-
-        html += `</tbody></table>`;
-        usersContainer.innerHTML = html;
-    }
     function validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val) {
         let validateFields = {
             name: validateName(username_val),
@@ -114,7 +45,8 @@
         }
         if (incorrectDataMessage.length > 0) {
             incorrectDataMessage = `Recheck these incorrect fields \n${incorrectDataMessage}`;
-            showNotification(incorrectDataMessage, ["ui-warn", "ui-invalid-fields"]);
+            notify(incorrectDataMessage, ["ui-warn", "ui-invalid-fields"]);
+            return false;
         }
         else {
             return true;
@@ -123,7 +55,7 @@
     }
 
     function validateName(userName) {
-        return userName.length > 0 ? true : false;
+        return !!userName?.length;
     }
     function validateEmail(userEmail) {
         let regexPattern = /[a-zA-Z0-9_\-\.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}$/;
@@ -140,141 +72,217 @@
     function validateDOB(userDOB) {
         let dob = new Date(userDOB);
         let today = new Date();
-        return today > dob;
+        return !!userDOB && today > dob;
     }
-    function setMaxDate(element) {
-        let dobInput = element;
-        let today = new Date().toISOString().split('T')[0];
-        dobInput.setAttribute('max', today);
+    function getMaxDate() {
+        return new Date().toISOString().split('T')[0];
     }
 
-    window.toggleEditMode = function (event, idOfUserToToggleEdit) {
-        let targetRow = event.currentTarget.closest("tr");
-        let targetButton = event.currentTarget;
-        let editState = targetButton.value;
-
-        targetRow.querySelectorAll('td').forEach((element) => {
-            if (element.hasAttribute('contenteditable')) {
-                if (editState == 'ON') {
-                    element.setAttribute("contenteditable", false);
-                }
-                else {
-                    element.setAttribute("contenteditable", true);
-                }
+    function onToggleEdit(e, userId) {
+        if (!editingUsers[userId]) {
+            let user = users.find(u => u.id === userId);
+            if (user) {
+                setEditingUsers(prev =>
+                    ({ ...prev, [userId]: { ...user } })
+                );
             }
-        });
-        let newEditState = editState === 'OFF' ? 'ON' : "OFF";
-        targetButton.value = newEditState;
-        targetButton.textContent = newEditState;
+        }
+        dispatch(toggleEditMode(userId));
     }
 
-    window.deleteUser = function (event, idOfUserToRemove) {
-        let targetRow = event.currentTarget.closest("tr");
-        let isNotInEditMode = targetRow.querySelector("#toggleButton").value === 'OFF';
-        if (isNotInEditMode) {
-            showNotification("Kindly enable edit mode ON to perform the operation", "ui-warn");
+    function onDelete(event, userId, isNotInEditMode) {
+        if (!isNotInEditMode) {
+            notify("Kindly enable edit mode ON to perform the operation", "ui-warn");
             return;
         }
-        targetRow.remove();
-        users_data = users_data.filter(user => user.id != idOfUserToRemove);
 
         let callback = {
             success: (resp) => {
-                showNotification("Wipped your data in db", "ui-info");
+                delete editingUsers[userId];
+                dispatch(deleteUser(userId));
+                notify("Wipped your data in db", "ui-info");
                 fetchUsers(0);
-                console.log("Updated list: ");
-                users_data.forEach((item) => {
-                    console.log(item);
-                });
             },
             error: (err) => {
-                showNotification("Error occured in deletion", "ui-error");
+                notify("Error occured in deletion", "ui-error");
                 console.log(err);
             }
         };
-        deleteUserInDb(callback, idOfUserToRemove);     // Delete operation
+        deleteUserInDb(callback, userId);     // Delete operation
     }
-    window.updateUser = function (event, idOfUserToUpdate) {
-        let targetRow = event.currentTarget.closest("tr");
-        let tableData = targetRow.querySelectorAll('td');
-        let isNotInEditMode = targetRow.querySelector("#toggleButton").value === 'OFF';
+    function onRowCellChange(userId, columnName, value) {
+        value = value.trim();
+        setEditingUsers(prev =>
+        ({
+            ...prev, [userId]: { ...prev[userId], [columnName]: value }
+        }));
+    }
+  
+    function onUpdate(event, userId, isNotInEditMode) {
+        let userToUpdate = editingUsers[userId];
 
-        if (isNotInEditMode) {
-            showNotification("Kindly enable edit mode ON to perform the operation", "ui-warn");
+        if (!isNotInEditMode) {
+            notify("Kindly enable edit mode ON to perform the operation", "ui-warn");
             return;
         }
-        let updateUser = {};
 
-        tableData.forEach(element => {
-            if (element.hasAttribute('contenteditable')) {
-                let key = element.getAttribute('data');
-                let value = element.textContent.trim();
-                updateUser[key] = value;
-
-            }
-        });
-        let valuesArray = Object.values(updateUser);
-        if (validateUserData(...valuesArray)) {
-            let storeIndex = users_data.findIndex(user => user.id == idOfUserToUpdate);
-            users_data[storeIndex] = Object.assign({}, users_data[storeIndex], updateUser);
-
+        let { userName, userEmail, userMobile, userDOB, userGender } = userToUpdate;
+  
+        if (validateUserData(userName, userEmail, userMobile, userDOB, userGender)) {
+            let { id, ...userObjectToUpdate } = userToUpdate;
             let callback = {
                 success: (resp) => {
+                    dispatch(updateUser({ id: userId, userObjectToUpdate }));
+                    notify("Yaay updated your data in db !!", "ui-info");
                     console.log(resp);
-                    showNotification("Yaay updated your data in db !!", "ui-info");
                 },
                 error: (err) => {
-                    showNotification("Error occured in updation", "ui-error");
+                    notify("Error occured in updation", "ui-error");
                     console.log(err);
                 }
             };
 
-            updateUserInDb(callback, idOfUserToUpdate, updateUser);     // Update operation
-
+            updateUserInDb(callback, userId, userObjectToUpdate);     // Update operation    
         }
-    
-        console.log("Store Data: ");
-        users_data.forEach((item) => {
-            console.log(item);
-        });
     }
 
-    window.fetchUsers = (pageNo) => {            // Read operation
-        isFetching = true;
+    function onUserSignup(e) {
+        e.preventDefault();
+        
+        let { username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val } = userFormData;
+        username_val = username_val.trim();
+        useremail_val = useremail_val.trim();
+        usermobilenum_val = usermobilenum_val.trim();
+
+        if (validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val)) {
+            let newUser = {};
+            newUser['id'] = crypto.randomUUID();
+            newUser['userName'] = username_val;
+            newUser['userEmail'] = useremail_val;
+            newUser['userMobile'] = usermobilenum_val;
+            newUser['userDOB'] = userdateofbirth_val;
+            newUser['userGender'] = usergender_val;
+
+            let callback = {
+                success: (resp) => {
+                    notify("User data created successfully", "ui-info");
+                    console.log(resp);
+                    dispatch(addUser(newUser));
+                    fetchUsers(0);
+                },
+                error: (err) => {
+                    notify("Error occured in sign up", "ui-error");
+                    console.log(err);
+                }
+            }
+            addUserInDb(callback, newUser);                 // Create operation
+            setUserFormData(initialFormData);
+        }
+    }
+
+    function fetchUsers(pageNo) {            // Read operation
+        setIsFetching(true);
         let callback = {
             success: (resp) => {
-                if(pageNo == 0){
-                    users_data = resp;
+                if (pageNo == 0) {
+                    dispatch(setUsers(resp));
                 }
-                else{
-                    users_data.push(...resp);
+                else {
+                    dispatch(appendUsers(resp));
                 }
-               
-                renderUsers();
-                isFetching = false;
-                isDataAvailableToFetch = resp.length == limit ;
+
+                setIsFetching(false);
+                signupConfig.current.currentPageNo = pageNo;
+                signupConfig.current.isDataAvailableToFetch = resp.length === signupConfig.current.limit;
+
             },
             error: (err) => {
-                showNotification("Error occured in fetching", "ui-error");
+                notify("Error occured in fetching", "ui-error");
+                setIsFetching(false);
                 console.log(err);
             }
         }
         let data = {
-            _start: pageNo * limit,
-            _limit: limit
+            _start: pageNo * signupConfig.current.limit,
+            _limit: signupConfig.current.limit
         };
         getUsersInDb(callback, data);
-        currentPageNo = pageNo;
     }
 
-    window.setPaginationHandlerForUsers = () => {                                   // pagination handler
-        window.addEventListener("scroll", () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - prefetchHeightBefore) {
-                if(isDataAvailableToFetch && !isFetching ){
-                    fetchUsers(currentPageNo + 1);
+    useEffect(() => {
+        fetchUsers(0);                  // 1st-fetch
+        let handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - signupConfig.current.prefetchHeightBefore) {
+                if (signupConfig.current.isDataAvailableToFetch && !isFetching) {
+                    fetchUsers(signupConfig.current.currentPageNo + 1);
                 }
             }
-        });
-    }
+        };
 
-})();
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    let formElements = [
+        {
+            label: "Name",
+            type: 'text',
+            value: userFormData['username_val'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, username_val: e.target.value}))
+        },
+        {
+            label: "Email",
+            type: 'text',
+            value: userFormData['useremail_val'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, useremail_val: e.target.value }))
+        },
+        {
+            label: "Mobile No",
+            type: 'text',
+            value: userFormData['usermobilenum_val'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, usermobilenum_val: e.target.value }))
+        },
+        {
+            label: "Date of birth",
+            type: 'date',
+            max_limit: getMaxDate(),
+            value: userFormData['userdateofbirth_val'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userdateofbirth_val: e.target.value }))
+        },
+        {
+            label: "Gender",
+            type: 'select',
+            value: userFormData['usergender_val'],
+            options: [
+                { value: "Select Gender", 'hide': true },
+                { value: "male" },
+                { value: "female" },
+                { value: "transgender" }
+            ],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, usergender_val: e.target.value }))
+        },
+        {
+            type: "actions",
+            className: "ui-sub-content ui-button-actions ui-flex ui-justify-space-between",
+            children: [
+                {
+                    type: "submit",
+                    value: 'Signup',
+                    className: "ui-button ui-submit",
+                    onClick: (e) => onUserSignup(e)
+                },
+                {
+                    type: 'reset',
+                    value: 'Reset',
+                    className: "ui-button ui-reset",
+                    onClick: () => setUserFormData(initialFormData)
+                }
+            ]
+        }
+
+    ];
+
+    return { formElements, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
+}
+
+export default useSignup;

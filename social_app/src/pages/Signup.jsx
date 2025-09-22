@@ -1,48 +1,35 @@
 import '../styles/style.css';
-import { nameChange} from "../actions/signupActions";
-import useSign from '../hooks/useSign'
+import useSignup from '../hooks/useSignup'
+import { inputRenderMap } from '../components/DynamicForm/inputRenderers';
+import UsersTable from '../components/UsersTable';
 
 function Signup(){
-    let {value, dispatch} = useSign();
+    let {formElements,  users, onToggleEdit ,onDelete, onUpdate, onRowCellChange} =  useSignup();
     return (
-        <div className="ui-crud-container ui-flex">
-            <div>Your name is {value}</div>
+        <div className="ui-crud-container ui-flex">     
         <main className="ui-main-content ui-flex ">
         <div className="ui-signup-image ui-align-stretch"></div>
         <form id="signup_form" className="ui-signup-form ui-flex ui-align-center">
-            <h1 className="ui-form-title">Sign up form</h1>
-            <div className="ui-sub-content ui-flex ui-align-center">
-            <label htmlFor="username">Name</label>
-            <input type="text" name="username" onChange= {(e)=>dispatch(nameChange(e.target.value))} />
-            </div>
-            <div className="ui-sub-content ui-flex ui-align-center">
-            <label htmlFor="useremail">Email</label>
-            <input type="text" name="useremail" />
-                                                 
-            </div>
-            <div className="ui-sub-content ui-flex ui-align-center">
-            <label htmlFor="usermobilenum">Mobile No</label>
-            <input type="tel" name="usermobilenum" placeholder="+91 10 digit number" />
-            </div>
-            <div className="ui-sub-content ui-flex ui-align-center">
-            <label htmlFor="userdateofbirth">Date of birth</label>
-            <input type="date" name="userdateofbirth" />
-            </div>
-            <div className="ui-sub-content ui-flex ui-align-center">
-            <label htmlFor="usergender" >Gender</label>
-            <select name="usergender" >
-                <option value="" hidden>Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="transgender">Transgender</option>
-            </select>
-            </div>
-            <div className="ui-sub-content ui-button-actions ui-flex ui-justify-space-between">
-                <button className="ui-button ui-submit">Sign Up</button>
-                <button type="reset" className="ui-button ui-reset">Reset</button>
-            </div>
+            <h1 className="ui-form-title">REACT - Sign up form</h1>
+
+            {formElements.map((field, ind)=>{
+                let InputRender = inputRenderMap[field.type];
+                if(InputRender == null){
+                     console.log(InputRender);
+                }
+               
+                return (
+                    <div key={ind} className="ui-sub-content ui-flex ui-align-center">
+                        {field.label && <label>{field.label}</label>}
+                        <InputRender field={field} />
+                    </div> 
+                )
+            })}
         </form>
         </main>
+        <div id="usersContainer" className="ui-users-data-table">
+        <UsersTable users_data={users}  onToggleEdit={onToggleEdit} onDelete={onDelete} onUpdate={onUpdate} onInputChange={onRowCellChange} />
+        </div>
        </div>
     )
 }

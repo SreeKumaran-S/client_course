@@ -1,8 +1,8 @@
 import {legacy_createStore as createStore, combineReducers} from 'redux';
-import signupReducer from '../reducer/signupReducer';
+import usersReducer from '../reducer/usersReducer';
 
 let rootReducer = combineReducers({
-        signup : signupReducer
+        usersState: usersReducer
     });
 
 let store = createStore(rootReducer);
