@@ -145,7 +145,7 @@ function useSignup() {
             let { id, ...userObjectToUpdate } = userToUpdate;
             let callback = {
                 success: (resp) => {
-                    dispatch(updateUser({ id: userId, userObjectToUpdate }));
+                    dispatch(updateUser(userId, userObjectToUpdate ));
                     notify("Yaay updated your data in db !!", "ui-info");
                     console.log(resp);
                 },
