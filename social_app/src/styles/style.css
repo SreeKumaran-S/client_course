@@ -144,11 +144,11 @@ input:focus:invalid, select:focus:invalid {
     background-color: beige;
     font-weight: bold;
 }
-.ui-cell-toogle.off, .ui-cell-delete.on:active{
+.ui-cell-toogle.ui-off, .ui-cell-delete.ui-on:active{
     background-color: salmon;
 }
 
-.ui-cell-toogle.on, .ui-cell-update.on:active, .ui-submit:active{
+.ui-cell-toogle.ui-on, .ui-cell-update.ui-on:active, .ui-submit:active{
     background-color: rgb(70, 206, 120);
 }
 .ui-notification {

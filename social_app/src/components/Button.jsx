@@ -1,9 +1,11 @@
 export default function Button({
-    className, 
-    children,
-    onClick,
-    disabled=false}){
+    className = "", 
+    children = null,
+    onClick = ()=> {},
+    disabled = false,
+}){
     return (
+        children &&
         <button className={className} onClick={onClick} disabled={disabled}>
             {children}
         </button>

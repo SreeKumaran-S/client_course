@@ -2,26 +2,10 @@ import '../styles/style.css';
 import useSignup from '../hooks/useSignup'
 import { inputRenderMap } from '../components/DynamicForm/inputRenderers';
 import UsersTable from '../components/UsersTable';
-// import Table from '../components/Table/Table';
-// import TableHeader from '../components/Table/TableHeader';
-// import TableBody from '../components/Table/TableBody';
-// import TableHeadColumn from '../components/Table/TableHeadColumn';
-// import TableRow from '../components/Table/TableRow';
-// import TableColumn from '../components/Table/TableColumn';
-// import Button from '../components/Button';
+
 
 function Signup() {
     let { formElements, users, onToggleEdit, onDelete, onUpdate, onRowCellChange } = useSignup();
-    let headers = ["Name", "Email", "Mobile", "DOB", "Gender", "Edit Mode", "Action"];
-    let columnsToShow = ["userName", "userEmail", "userMobile", "userDOB", "userGender"];
-    let tableClassName = "ui-users-table";
-    let elementValues = {
-        caption_val : 'Users Data',
-        delete_val : 'Delete',
-        update_val : 'Update',
-        emptyTable_val : 'No data found'
-    };
-    
     return (
         <div className="ui-crud-container ui-flex">
             <main className="ui-main-content ui-flex ">
@@ -44,22 +28,40 @@ function Signup() {
                     })}
                 </form>
             </main>
-            <div id="usersContainer" className="ui-users-data-table">        
-                
-                <UsersTable 
-                    className={tableClassName}
-                    columnsToShow={columnsToShow}
-                    headers={headers}
-                    users={users}
-                    onDelete={onDelete}
-                    onUpdate={onUpdate}
-                    onRowCellChange={onRowCellChange}
-                    onToggleEdit={onToggleEdit}
-                    elementValues={elementValues}
+           
+            <div id="usersContainer" className="ui-users-data-table">
+                <UsersTable
+                    className = 'ui-users-table'
+                    caption = 'Users Data'
+                    emptyStateMessage = "No data found"
+                    headers = {["Name", "Email", "Mobile", "DOB", "Gender", "Edit Mode", "Action"]}
+                    columnsToShow = {["userName", "userEmail", "userMobile", "userDOB", "userGender"]}
+                    toggleButton = {{
+                        className: `ui-table-btn ui-button ui-cell-toogle`,
+                        on: {className:'ui-on', label: 'ON' },
+                        off: {className:'ui-off', label: 'OFF'}
+                    }}
+                    deleteButton = {{
+                        label: 'Delete',
+                        className: `ui-table-btn ui-button ui-cell-delete margin-right-10`,
+                        on: {className:'ui-on'},
+                        off: {className:'ui-off' }
+                    }}   
+                    updateButton = {{
+                        label: 'Update',
+                        className: `ui-table-btn ui-button ui-cell-update`,
+                        on: {className:'ui-on'},
+                        off: {className:'ui-off'}
+                    }}
+                    users = {users}
+                    onDelete = {onDelete}
+                    onUpdate = {onUpdate}
+                    onRowCellChange = {onRowCellChange}
+                    onToggleEdit = {onToggleEdit}
                 />
-
-                {/* <UsersTable users_data={users}  onToggleEdit={onToggleEdit} onDelete={onDelete} onUpdate={onUpdate} onInputChange={onRowCellChange} /> */}
                 
+
+               
                 {/* <Table className={"ui-users-table"}>
                     <>
                         <TableHeader>
