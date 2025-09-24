@@ -124,7 +124,7 @@ function useSignup() {
         deleteUserInDb(callback, userId);     // Delete operation
     }
     function onRowCellChange(userId, columnName, value) {
-        value = value.trim();
+        value = value?.trim();
         setEditingUsers(prev =>
         ({
             ...prev, [userId]: { ...prev[userId], [columnName]: value }
