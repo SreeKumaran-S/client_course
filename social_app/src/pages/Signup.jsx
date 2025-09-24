@@ -5,7 +5,7 @@ import UsersTable from '../components/UsersTable';
 
 
 function Signup() {
-    let { formElements, users, onToggleEdit, onDelete, onUpdate, onRowCellChange } = useSignup();
+    let { formElements, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange } = useSignup();
     return (
         <div className="ui-crud-container ui-flex">
             <main className="ui-main-content ui-flex ">
@@ -29,7 +29,7 @@ function Signup() {
                 </form>
             </main>
            
-            <div id="usersContainer" className="ui-users-data-table">
+            <div id="usersContainer" className="ui-users-data-table" ref={setScrollContainer}>
                 <UsersTable
                     className = 'ui-users-table'
                     caption = 'Users Data'

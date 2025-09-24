@@ -1,24 +1,10 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
 import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
 
 function useSignup() {
-    useEffect(() => {
-        fetchUsers(0);                  // 1st-fetch
-        let handleScroll = () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - signupConfig.current.prefetchHeightBefore) {
-                if (signupConfig.current.isDataAvailableToFetch && ! signupConfig.current.isFetching) {
-                    fetchUsers(signupConfig.current.currentPageNo + 1);
-                }
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
     let users = useSelector((state) => state.usersState.users);
     let dispatch = useDispatch();
     let { notify } = useNotification();
@@ -26,9 +12,11 @@ function useSignup() {
         currentPageNo: 0,
         limit: 5,
         prefetchHeightBefore: 100,
+        scrollContainer: null,
         isDataAvailableToFetch: true,
-        isFetching: false
+        isFetching: false,
     });
+
 
     const initialFormData = {
         username_val: "",
@@ -39,6 +27,28 @@ function useSignup() {
     };
     let [userFormData, setUserFormData] = useState(initialFormData);
     let [editingUsers, setEditingUsers] = useState({});
+
+    let setScrollContainer = useCallback((el) => {
+        signupConfig.current.scrollContainer = el;
+    }, []);
+
+    useEffect(() => {
+        fetchUsers(0);                  // 1st-fetch
+        let scrollContainer = signupConfig.current.scrollContainer;
+        if (!scrollContainer) {
+            return;
+        }
+        let handleScroll = () => {
+            if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - signupConfig.current.prefetchHeightBefore) {
+                if (signupConfig.current.isDataAvailableToFetch && !signupConfig.current.isFetching) {
+                    fetchUsers(signupConfig.current.currentPageNo + 1);
+                }
+            }
+        };
+
+        scrollContainer.addEventListener("scroll", handleScroll);
+        return () => scrollContainer.removeEventListener("scroll", handleScroll);
+    }, []);
 
     function validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val) {
         let validateFields = {
@@ -130,7 +140,7 @@ function useSignup() {
             ...prev, [userId]: { ...prev[userId], [columnName]: value }
         }));
     }
-  
+
     function onUpdate(event, userId, isNotInEditMode) {
         let userToUpdate = editingUsers[userId];
 
@@ -140,12 +150,12 @@ function useSignup() {
         }
 
         let { userName, userEmail, userMobile, userDOB, userGender } = userToUpdate;
-  
+
         if (validateUserData(userName, userEmail, userMobile, userDOB, userGender)) {
             let { id, ...userObjectToUpdate } = userToUpdate;
             let callback = {
                 success: (resp) => {
-                    dispatch(updateUser(userId, userObjectToUpdate ));
+                    dispatch(updateUser(userId, userObjectToUpdate));
                     notify("Yaay updated your data in db !!", "ui-info");
                     console.log(resp);
                 },
@@ -161,7 +171,7 @@ function useSignup() {
 
     function onUserSignup(e) {
         e.preventDefault();
-        
+
         let { username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val } = userFormData;
         username_val = username_val.trim();
         useremail_val = useremail_val.trim();
@@ -194,7 +204,7 @@ function useSignup() {
     }
 
     function fetchUsers(pageNo) {            // Read operation
-        signupConfig.current.isFetching = true; 
+        signupConfig.current.isFetching = true;
         let callback = {
             success: (resp) => {
                 if (pageNo === 0) {
@@ -227,7 +237,7 @@ function useSignup() {
             label: "Name",
             type: 'text',
             value: userFormData['username_val'],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, username_val: e.target.value}))
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, username_val: e.target.value }))
         },
         {
             label: "Email",
@@ -281,7 +291,7 @@ function useSignup() {
 
     ];
 
-    return { formElements, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
+    return { formElements, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
 }
 
 export default useSignup;

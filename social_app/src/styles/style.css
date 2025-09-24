@@ -109,6 +109,8 @@ input:focus:invalid, select:focus:invalid {
 } */
 .ui-users-data-table{
     margin-top:30px;
+    max-height: 400px;      
+    overflow-y: auto; 
 }
 .ui-users-table {
     width:900px;
