@@ -5,12 +5,11 @@ import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode 
 import { useNotification } from '../context/NotificationContext';
 
 function useSignup() {
-    
     useEffect(() => {
         fetchUsers(0);                  // 1st-fetch
         let handleScroll = () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - signupConfig.current.prefetchHeightBefore) {
-                if (signupConfig.current.isDataAvailableToFetch && !isFetching) {
+                if (signupConfig.current.isDataAvailableToFetch && ! signupConfig.current.isFetching) {
                     fetchUsers(signupConfig.current.currentPageNo + 1);
                 }
             }
@@ -19,15 +18,16 @@ function useSignup() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
     let users = useSelector((state) => state.usersState.users);
     let dispatch = useDispatch();
     let { notify } = useNotification();
-    let [isFetching, setIsFetching] = useState(false);
     let signupConfig = useRef({
         currentPageNo: 0,
         limit: 5,
         prefetchHeightBefore: 100,
-        isDataAvailableToFetch: true
+        isDataAvailableToFetch: true,
+        isFetching: false
     });
 
     const initialFormData = {
@@ -194,7 +194,7 @@ function useSignup() {
     }
 
     function fetchUsers(pageNo) {            // Read operation
-        setIsFetching(true);
+        signupConfig.current.isFetching = true; 
         let callback = {
             success: (resp) => {
                 if (pageNo === 0) {
@@ -204,14 +204,14 @@ function useSignup() {
                     dispatch(appendUsers(resp));
                 }
 
-                setIsFetching(false);
+                signupConfig.current.isFetching = false;
                 signupConfig.current.currentPageNo = pageNo;
                 signupConfig.current.isDataAvailableToFetch = resp.length === signupConfig.current.limit;
 
             },
             error: (err) => {
                 notify("Error occured in fetching", "ui-error");
-                setIsFetching(false);
+                signupConfig.current.isFetching = false;
                 console.log(err);
             }
         }
