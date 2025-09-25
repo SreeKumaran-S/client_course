@@ -25,6 +25,12 @@
     border:1px solid black;
     padding:10px;
 }
+.ui-add-usr-btn{
+    background-color: beige;
+    &:active{
+        background-color: rgba(9, 241, 140, 0.507);
+    }
+}
 
 body{
     background: rgb(97 116 133);
@@ -82,7 +88,7 @@ body{
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width:70px;
+    width: fit-content;
     cursor: pointer;
     font-weight: bold;
 } 

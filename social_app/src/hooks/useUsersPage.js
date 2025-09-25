@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
+import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode, UPDATE_USER } from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
 import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
 import { validateUserData } from '../utils/userValidator';
 import { useNavigate } from 'react-router-dom';
+import { constants } from '../services/constants';
 
 function useUsersPage() {
     let users = useSelector((state) => state.usersState.users);
@@ -117,24 +118,28 @@ function useUsersPage() {
             return;
         }
     
-        let userToUpdate = editingUsers[userId];
+        // let userToUpdate = editingUsers[userId];
     
-        navigate('/updateUser', {
-            state: {
-                initialFormData : {
-                    userid_val : userToUpdate.id,
-                    username_val: userToUpdate.userName,
-                    useremail_val: userToUpdate.userEmail,
-                    usermobilenum_val: userToUpdate.userMobile,
-                    userdateofbirth_val: userToUpdate.userDOB,
-                    usergender_val: userToUpdate.userGender,
-                }
-            }
-        });
-
+        navigate(constants.UPDATE_USER(userId));
+        
+        //     , {
+        //     state: {
+        //         initialFormData : {
+        //             userid_val : userToUpdate.id,
+        //             username_val: userToUpdate.userName,
+        //             useremail_val: userToUpdate.userEmail,
+        //             usermobilenum_val: userToUpdate.userMobile,
+        //             userdateofbirth_val: userToUpdate.userDOB,
+        //             usergender_val: userToUpdate.userGender,
+        //         }
+        //     }
+        // });
+    }
+    function goToAddUsersPage(){
+        navigate(constants.ADD_USER());
     }
 
 
-    return { setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
+    return {goToAddUsersPage, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
 }
 export default useUsersPage;

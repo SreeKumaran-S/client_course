@@ -1,9 +1,12 @@
 import useUsersPage from '../hooks/useUsersPage';
 import UsersTable from '../components/UsersTable';
+import Button from '../components/Button';
 
 function UsersPage(){
-    let {setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange} = useUsersPage();
+    let {goToAddUsersPage, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange} = useUsersPage();
     return(
+        <>
+        <Button className="ui-button ui-add-usr-btn" onClick={goToAddUsersPage}>Add Users</Button>
      <div id="usersContainer" className="ui-users-data-table ui-flex" ref={setScrollContainer}>
                 <UsersTable
                     className = 'ui-users-table'
@@ -35,6 +38,7 @@ function UsersPage(){
                     onToggleEdit = {onToggleEdit}
                 />
      </div>
+     </>
           )     
 }
 export default UsersPage;

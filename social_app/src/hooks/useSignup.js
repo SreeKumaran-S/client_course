@@ -4,16 +4,50 @@ import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../se
 import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
 import { validateUserData } from '../utils/userValidator';
-import { useNavigate, useLocation} from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { constants } from '../services/constants';
 
-function useSignup(initialFormData) {
+function useSignup(pageName) {
     let users = useSelector((state) => state.usersState.users);
+    let { notify } = useNotification();
     let dispatch = useDispatch();
     let navigate = useNavigate();
-    let { notify } = useNotification();
-    let location = useLocation();
+    let { id } = useParams();
 
-    let [userFormData, setUserFormData] = useState(initialFormData);
+    let initialFormData = useRef({
+        userId: crypto.randomUUID(),
+        userName: "",
+        userEmail: "",
+        userMobile: "",
+        userDOB: "",
+        userGender: "",
+    });
+
+    let [userFormData, setUserFormData] = useState(initialFormData.current);
+
+    useEffect(() => {
+        if (pageName === constants.UPDATE_USER_PAGE) {
+            let callback = {
+                success: (resp) => {
+                    console.log(resp);
+                    let { id, userName, userEmail, userMobile, userDOB, userGender } = resp[0];
+                    let fetchedData = {
+                        userId: id,
+                        userName, userEmail, userMobile, userDOB, userGender
+                    };
+
+                    initialFormData.current = fetchedData;
+                    setUserFormData(initialFormData.current);
+                },
+                error: (err) => {
+                    notify("Error occured in fetching", "ui-error");
+                    console.log(err);
+                }
+            }
+            let data = { id };
+            getUsersInDb(callback, data);
+        }
+    },[]);
 
     function getMaxDate() {
         return new Date().toISOString().split('T')[0];
@@ -22,29 +56,23 @@ function useSignup(initialFormData) {
     function onUserSignup(e) {
         e.preventDefault();
 
-        let { userid_val, username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val } = userFormData;
-        username_val = username_val.trim();
-        useremail_val = useremail_val.trim();
-        usermobilenum_val = usermobilenum_val.trim();
+        let { userId, userName, userEmail, userMobile, userDOB, userGender } = userFormData;
+        userName = userName.trim();
+        userEmail = userEmail.trim();
+        userMobile = userMobile.trim();
 
-        let invalidFields = validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val);
+        let invalidFields = validateUserData(userName, userEmail, userMobile, userDOB, userGender);
 
         if (invalidFields.length === 0) {
-            let user = {};
-            user['id'] = userid_val;
-            user['userName'] = username_val;
-            user['userEmail'] = useremail_val;
-            user['userMobile'] = usermobilenum_val;
-            user['userDOB'] = userdateofbirth_val;
-            user['userGender'] = usergender_val;
+            let user = { userId, userName, userEmail, userMobile, userDOB, userGender };
 
-            if (location.pathname.startsWith("/addUser")) {
+            if (pageName === constants.ADD_USER_PAGE) {
                 let callback = {
                     success: (resp) => {
                         notify("User data created successfully", "ui-info");
                         dispatch(addUser(user));
                         console.log(resp);
-                        // navigate('/');
+                        navigate('/');
                     },
                     error: (err) => {
                         notify("Error occured in sign up", "ui-error");
@@ -53,12 +81,12 @@ function useSignup(initialFormData) {
                 }
                 addUserInDb(callback, user);                 // Create operation
             }
-            else if (location.pathname.startsWith("/updateUser")) {
-                let { id, ...userObjectToUpdate } = user;
+            else if (pageName === constants.UPDATE_USER_PAGE) {
+                let { userId, ...userObjectToUpdate } = user;
                 let callback = {
                     success: (resp) => {
                         notify("Yaay updated your data in db !!", "ui-info");
-                        dispatch(updateUser(id, userObjectToUpdate));
+                        dispatch(updateUser(userId, userObjectToUpdate));
                         console.log(resp);
                         navigate('/');
                     },
@@ -68,10 +96,10 @@ function useSignup(initialFormData) {
                     }
                 };
 
-                updateUserInDb(callback, id, userObjectToUpdate);     // Update operation 
+                updateUserInDb(callback, userId, userObjectToUpdate);     // Update operation 
             }
-            
-            setUserFormData(initialFormData);
+
+            setUserFormData(initialFormData.current);
         }
         else {
             let incorrectDataMessage = `Recheck these incorrect fields:\n${invalidFields.join('\n')}`;
@@ -85,39 +113,39 @@ function useSignup(initialFormData) {
         {
             label: "Name",
             type: 'text',
-            value: userFormData['username_val'],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, username_val: e.target.value }))
+            value: userFormData['userName'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userName: e.target.value }))
         },
         {
             label: "Email",
             type: 'text',
-            value: userFormData['useremail_val'],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, useremail_val: e.target.value }))
+            value: userFormData['userEmail'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userEmail: e.target.value }))
         },
         {
             label: "Mobile No",
             type: 'text',
-            value: userFormData['usermobilenum_val'],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, usermobilenum_val: e.target.value }))
+            value: userFormData['userMobile'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userMobile: e.target.value }))
         },
         {
             label: "Date of birth",
             type: 'date',
             max_limit: getMaxDate(),
-            value: userFormData['userdateofbirth_val'],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, userdateofbirth_val: e.target.value }))
+            value: userFormData['userDOB'],
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userDOB: e.target.value }))
         },
         {
             label: "Gender",
             type: 'select',
-            value: userFormData['usergender_val'],
+            value: userFormData['userGender'],
             options: [
-                { value: "-", label:"Select Gender", 'hide': true },
+                { value: "", label: "Select Gender", 'hide': true },
                 { value: "male", label: "male" },
                 { value: "female", label: "female" },
                 { value: "transgender", label: "transgender" }
             ],
-            onChange: (e) => setUserFormData((prev) => ({ ...prev, usergender_val: e.target.value }))
+            onChange: (e) => setUserFormData((prev) => ({ ...prev, userGender: e.target.value }))
         },
         {
             type: "actions",
@@ -133,7 +161,7 @@ function useSignup(initialFormData) {
                     type: 'reset',
                     value: 'Reset',
                     className: "ui-button ui-reset",
-                    onClick: () => setUserFormData(initialFormData)
+                    onClick: () => setUserFormData(initialFormData.current)
                 }
             ]
         }

@@ -3,18 +3,20 @@ import useSignup from '../hooks/useSignup'
 import { inputRenderMap } from '../components/DynamicForm/inputRenderers';
 import {useLocation} from 'react-router-dom';
 
-function Signup() {
-    let location = useLocation();
-    let initialFormData = location.state?.initialFormData ||
-    {
-        userid_val: crypto.randomUUID(),
-        username_val: "",
-        useremail_val: "",
-        usermobilenum_val: "",
-        userdateofbirth_val: "",
-        usergender_val: "-"
-    }
-    let { formElements } = useSignup(initialFormData);
+function Signup({
+    pageName = null,
+}) {    
+    // let location = useLocation();
+    // let initialFormData = location.state?.initialFormData ||
+    // {
+    //     userid_val: crypto.randomUUID(),
+    //     username_val: "",
+    //     useremail_val: "",
+    //     usermobilenum_val: "",
+    //     userdateofbirth_val: "",
+    //     usergender_val: "-"
+    // }
+    let { formElements } = useSignup(pageName);
     return (
         <div className="ui-crud-container ui-flex">
             <main className="ui-main-content ui-flex ">
