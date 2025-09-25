@@ -1,14 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
-import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
+import { addUser, updateUser} from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
 import { validateUserData } from '../utils/userValidator';
 import { useNavigate, useParams } from 'react-router-dom';
 import { constants } from '../services/constants';
 
 function useSignup(pageName) {
-    let users = useSelector((state) => state.usersState.users);
     let { notify } = useNotification();
     let dispatch = useDispatch();
     let navigate = useNavigate();

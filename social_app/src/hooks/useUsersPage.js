@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode, UPDATE_USER } from '../actions/signupActions';
+import { setUsers, appendUsers, deleteUser, toggleEditMode } from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
-import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
-import { validateUserData } from '../utils/userValidator';
+import { getUsersInDb, deleteUserInDb } from '../services/request.js';
 import { useNavigate } from 'react-router-dom';
 import { constants } from '../services/constants';
 
@@ -117,23 +116,7 @@ function useUsersPage() {
             notify("Kindly enable edit mode ON to perform the operation", "ui-warn");
             return;
         }
-    
-        // let userToUpdate = editingUsers[userId];
-    
         navigate(constants.UPDATE_USER(userId));
-        
-        //     , {
-        //     state: {
-        //         initialFormData : {
-        //             userid_val : userToUpdate.id,
-        //             username_val: userToUpdate.userName,
-        //             useremail_val: userToUpdate.userEmail,
-        //             usermobilenum_val: userToUpdate.userMobile,
-        //             userdateofbirth_val: userToUpdate.userDOB,
-        //             usergender_val: userToUpdate.userGender,
-        //         }
-        //     }
-        // });
     }
     function goToAddUsersPage(){
         navigate(constants.ADD_USER());
