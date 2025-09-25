@@ -18,6 +18,13 @@
 .ui-justify-space-between{
     justify-content: space-between;
 }
+.ui-dir-fcol{
+    flex-direction: column;
+}
+.ui-error-container{
+    border:1px solid black;
+    padding:10px;
+}
 
 body{
     background: rgb(97 116 133);
@@ -109,7 +116,7 @@ input:focus:invalid, select:focus:invalid {
 } */
 .ui-users-data-table{
     margin-top:30px;
-    max-height: 400px;      
+    max-height: 800px;      
     overflow-y: auto; 
 }
 .ui-users-table {

@@ -3,234 +3,83 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getUsersInDb, addUserInDb, deleteUserInDb, updateUserInDb } from '../services/request.js';
 import { setUsers, appendUsers, addUser, deleteUser, updateUser, toggleEditMode } from '../actions/signupActions';
 import { useNotification } from '../context/NotificationContext';
+import { validateUserData } from '../utils/userValidator';
+import { useNavigate, useLocation} from 'react-router-dom';
 
-function useSignup() {
+function useSignup(initialFormData) {
     let users = useSelector((state) => state.usersState.users);
     let dispatch = useDispatch();
+    let navigate = useNavigate();
     let { notify } = useNotification();
-    let signupConfig = useRef({
-        currentPageNo: 0,
-        limit: 5,
-        prefetchHeightBefore: 100,
-        scrollContainer: null,
-        isDataAvailableToFetch: true,
-        isFetching: false,
-    });
+    let location = useLocation();
 
-
-    const initialFormData = {
-        username_val: "",
-        useremail_val: "",
-        usermobilenum_val: "",
-        userdateofbirth_val: "",
-        usergender_val: ""
-    };
     let [userFormData, setUserFormData] = useState(initialFormData);
-    let [editingUsers, setEditingUsers] = useState({});
 
-    let setScrollContainer = useCallback((el) => {
-        signupConfig.current.scrollContainer = el;
-    }, []);
-
-    useEffect(() => {
-        fetchUsers(0);                  // 1st-fetch
-        let scrollContainer = signupConfig.current.scrollContainer;
-        if (!scrollContainer) {
-            return;
-        }
-        let handleScroll = () => {
-            if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - signupConfig.current.prefetchHeightBefore) {
-                if (signupConfig.current.isDataAvailableToFetch && !signupConfig.current.isFetching) {
-                    fetchUsers(signupConfig.current.currentPageNo + 1);
-                }
-            }
-        };
-
-        scrollContainer.addEventListener("scroll", handleScroll);
-        return () => scrollContainer.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    function validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val) {
-        let validateFields = {
-            name: validateName(username_val),
-            email: validateEmail(useremail_val),
-            mobile: validateMobile(usermobilenum_val),
-            dob: validateDOB(userdateofbirth_val),
-            gender: validateGender(usergender_val)
-        };
-
-
-        let incorrectDataMessage = "";
-        for (let key in validateFields) {
-            if (!validateFields[key]) {
-                incorrectDataMessage = incorrectDataMessage.concat(key + "\n");
-            }
-        }
-        if (incorrectDataMessage.length > 0) {
-            incorrectDataMessage = `Recheck these incorrect fields \n${incorrectDataMessage}`;
-            notify(incorrectDataMessage, ["ui-warn", "ui-invalid-fields"]);
-            return false;
-        }
-        else {
-            return true;
-        }
-
-    }
-
-    function validateName(userName) {
-        return !!userName?.length;
-    }
-    function validateEmail(userEmail) {
-        let regexPattern = /[a-zA-Z0-9_\-.]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,4}$/;
-        return regexPattern.test(userEmail);
-    }
-    function validateMobile(userMobile) {
-        let regexPattern = /^\+91\s?[6-9][0-9]{9}$/;
-        return regexPattern.test(userMobile);
-    }
-    function validateGender(userGender) {
-        let regexPattern = /^(male|female|transgender)$/;
-        return regexPattern.test(userGender);
-    }
-    function validateDOB(userDOB) {
-        let dob = new Date(userDOB);
-        let today = new Date();
-        return !!userDOB && today > dob;
-    }
     function getMaxDate() {
         return new Date().toISOString().split('T')[0];
-    }
-
-    function onToggleEdit(e, userId) {
-        if (!editingUsers[userId]) {
-            let user = users.find(u => u.id === userId);
-            if (user) {
-                setEditingUsers(prev =>
-                    ({ ...prev, [userId]: { ...user } })
-                );
-            }
-        }
-        dispatch(toggleEditMode(userId));
-    }
-
-    function onDelete(event, userId, isNotInEditMode) {
-        if (!isNotInEditMode) {
-            notify("Kindly enable edit mode ON to perform the operation", "ui-warn");
-            return;
-        }
-
-        let callback = {
-            success: (resp) => {
-                delete editingUsers[userId];
-                dispatch(deleteUser(userId));
-                notify("Wipped your data in db", "ui-info");
-                fetchUsers(0);
-            },
-            error: (err) => {
-                notify("Error occured in deletion", "ui-error");
-                console.log(err);
-            }
-        };
-        deleteUserInDb(callback, userId);     // Delete operation
-    }
-    function onRowCellChange(userId, columnName, value) {
-        value = value?.trim();
-        setEditingUsers(prev =>
-        ({
-            ...prev, [userId]: { ...prev[userId], [columnName]: value }
-        }));
-    }
-
-    function onUpdate(event, userId, isNotInEditMode) {
-        let userToUpdate = editingUsers[userId];
-
-        if (!isNotInEditMode) {
-            notify("Kindly enable edit mode ON to perform the operation", "ui-warn");
-            return;
-        }
-
-        let { userName, userEmail, userMobile, userDOB, userGender } = userToUpdate;
-
-        if (validateUserData(userName, userEmail, userMobile, userDOB, userGender)) {
-            let { id, ...userObjectToUpdate } = userToUpdate;
-            let callback = {
-                success: (resp) => {
-                    dispatch(updateUser(userId, userObjectToUpdate));
-                    notify("Yaay updated your data in db !!", "ui-info");
-                    console.log(resp);
-                },
-                error: (err) => {
-                    notify("Error occured in updation", "ui-error");
-                    console.log(err);
-                }
-            };
-
-            updateUserInDb(callback, userId, userObjectToUpdate);     // Update operation    
-        }
     }
 
     function onUserSignup(e) {
         e.preventDefault();
 
-        let { username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val } = userFormData;
+        let { userid_val, username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val } = userFormData;
         username_val = username_val.trim();
         useremail_val = useremail_val.trim();
         usermobilenum_val = usermobilenum_val.trim();
 
-        if (validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val)) {
-            let newUser = {};
-            newUser['id'] = crypto.randomUUID();
-            newUser['userName'] = username_val;
-            newUser['userEmail'] = useremail_val;
-            newUser['userMobile'] = usermobilenum_val;
-            newUser['userDOB'] = userdateofbirth_val;
-            newUser['userGender'] = usergender_val;
+        let invalidFields = validateUserData(username_val, useremail_val, usermobilenum_val, userdateofbirth_val, usergender_val);
 
-            let callback = {
-                success: (resp) => {
-                    notify("User data created successfully", "ui-info");
-                    console.log(resp);
-                    dispatch(addUser(newUser));
-                    fetchUsers(0);
-                },
-                error: (err) => {
-                    notify("Error occured in sign up", "ui-error");
-                    console.log(err);
+        if (invalidFields.length === 0) {
+            let user = {};
+            user['id'] = userid_val;
+            user['userName'] = username_val;
+            user['userEmail'] = useremail_val;
+            user['userMobile'] = usermobilenum_val;
+            user['userDOB'] = userdateofbirth_val;
+            user['userGender'] = usergender_val;
+
+            if (location.pathname.startsWith("/addUser")) {
+                let callback = {
+                    success: (resp) => {
+                        notify("User data created successfully", "ui-info");
+                        dispatch(addUser(user));
+                        console.log(resp);
+                        // navigate('/');
+                    },
+                    error: (err) => {
+                        notify("Error occured in sign up", "ui-error");
+                        console.log(err);
+                    }
                 }
+                addUserInDb(callback, user);                 // Create operation
             }
-            addUserInDb(callback, newUser);                 // Create operation
+            else if (location.pathname.startsWith("/updateUser")) {
+                let { id, ...userObjectToUpdate } = user;
+                let callback = {
+                    success: (resp) => {
+                        notify("Yaay updated your data in db !!", "ui-info");
+                        dispatch(updateUser(id, userObjectToUpdate));
+                        console.log(resp);
+                        navigate('/');
+                    },
+                    error: (err) => {
+                        notify("Error occured in updation", "ui-error");
+                        console.log(err);
+                    }
+                };
+
+                updateUserInDb(callback, id, userObjectToUpdate);     // Update operation 
+            }
+            
             setUserFormData(initialFormData);
         }
-    }
-
-    function fetchUsers(pageNo) {            // Read operation
-        signupConfig.current.isFetching = true;
-        let callback = {
-            success: (resp) => {
-                if (pageNo === 0) {
-                    dispatch(setUsers(resp));
-                }
-                else {
-                    dispatch(appendUsers(resp));
-                }
-
-                signupConfig.current.isFetching = false;
-                signupConfig.current.currentPageNo = pageNo;
-                signupConfig.current.isDataAvailableToFetch = resp.length === signupConfig.current.limit;
-
-            },
-            error: (err) => {
-                notify("Error occured in fetching", "ui-error");
-                signupConfig.current.isFetching = false;
-                console.log(err);
-            }
+        else {
+            let incorrectDataMessage = `Recheck these incorrect fields:\n${invalidFields.join('\n')}`;
+            notify(incorrectDataMessage, ["ui-warn", "ui-invalid-fields"]);
         }
-        let data = {
-            _start: pageNo * signupConfig.current.limit,
-            _limit: signupConfig.current.limit
-        };
-        getUsersInDb(callback, data);
     }
+
+
 
     let formElements = [
         {
@@ -263,10 +112,10 @@ function useSignup() {
             type: 'select',
             value: userFormData['usergender_val'],
             options: [
-                { value: "Select Gender", 'hide': true },
-                { value: "male" },
-                { value: "female" },
-                { value: "transgender" }
+                { value: "-", label:"Select Gender", 'hide': true },
+                { value: "male", label: "male" },
+                { value: "female", label: "female" },
+                { value: "transgender", label: "transgender" }
             ],
             onChange: (e) => setUserFormData((prev) => ({ ...prev, usergender_val: e.target.value }))
         },
@@ -291,7 +140,7 @@ function useSignup() {
 
     ];
 
-    return { formElements, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange };
+    return { formElements };
 }
 
 export default useSignup;

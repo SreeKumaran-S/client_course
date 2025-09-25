@@ -11,7 +11,7 @@ export const inputRenderMap = {
           onClick={field.onClick} 
           onChange={field.onChange}>
             {field.options.map((option, ind) => (
-                <option key={ind} value={option.value} hidden={option.hide}>{option.value}</option>
+                <option key={ind} value={option.value} hidden={option.hide}>{option.label}</option>
             ))}
         </select>
     ),
@@ -25,7 +25,8 @@ export const inputRenderMap = {
   )
 }
 
-const renderInput = ({ field, type = "text" }) => (
+const renderInput = ({ field, type = "text" }) => {
+  return(
   <input
     className={field.className}
     type={type}
@@ -33,5 +34,5 @@ const renderInput = ({ field, type = "text" }) => (
     onChange={field.onChange}
     onClick={field.onClick}
     max={field.max_limit} 
-  />
-);
+  />)
+};
