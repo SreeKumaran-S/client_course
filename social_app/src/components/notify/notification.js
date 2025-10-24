@@ -21,7 +21,7 @@ export default function Notification({ message, types, duration = 2000, onClose}
     let typeClasses = Array.isArray(types) ? types.join(" ") : types || "";
 
     return (
-        <div className={`ui-notification ${show ? "show" : ""} ${typeClasses}`}>
+        <div className={`ui-notification ${show ? "show" : ""} ${typeClasses}`} data-testid="notificationComp">
             {message}
         </div>
     );

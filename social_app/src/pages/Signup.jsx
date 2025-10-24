@@ -21,7 +21,7 @@ function Signup({
 
                         return (
                             <div key={ind} className="ui-sub-content ui-flex ui-align-center">
-                                {field.label && <label>{field.label}</label>}
+                                {field.label && <label for={field.label}>{field.label}</label>}
                                 <InputRender field={field} />
                             </div>
                         )

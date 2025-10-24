@@ -6,8 +6,8 @@ function UsersPage() {
     let { goToAddUsersPage, setScrollContainer, users, onToggleEdit, onDelete, onUpdate, onRowCellChange } = useUsersPage();
     return (
         <>
-            <Button className="ui-button ui-add-usr-btn" onClick={goToAddUsersPage}>Add Users</Button>
-            <div id="usersContainer" className="ui-users-data-table ui-flex" ref={setScrollContainer}>
+            <Button className="ui-button ui-add-usr-btn" title="Add Users" onClick={goToAddUsersPage}>Add Users</Button>
+            <div data-testid="usersContainer" className="ui-users-data-table ui-flex" ref={setScrollContainer}>
                 <UsersTable
                     className='ui-users-table'
                     caption='Users Data'

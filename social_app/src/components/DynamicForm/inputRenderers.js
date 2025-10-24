@@ -6,6 +6,7 @@ export const inputRenderMap = {
   "reset": ({ field }) => renderInput({ field, type: "reset" }),
   "select": ({ field }) => (
         <select 
+          title = {field.title}
           className={field.className} 
           value={field.value} 
           onClick={field.onClick} 
@@ -28,6 +29,7 @@ export const inputRenderMap = {
 const renderInput = ({ field, type = "text" }) => {
   return(
   <input
+    title={field.title}
     className={field.className}
     type={type}
     value={field.value}

@@ -111,24 +111,28 @@ function useSignup(pageName) {
     let formElements = [
         {
             label: "Name",
+            title: "userName",
             type: 'text',
             value: userFormData['userName'],
             onChange: (e) => setUserFormData((prev) => ({ ...prev, userName: e.target.value }))
         },
         {
             label: "Email",
+            title: "userEmail",
             type: 'text',
             value: userFormData['userEmail'],
             onChange: (e) => setUserFormData((prev) => ({ ...prev, userEmail: e.target.value }))
         },
         {
             label: "Mobile No",
+            title: "userMobile",
             type: 'text',
             value: userFormData['userMobile'],
             onChange: (e) => setUserFormData((prev) => ({ ...prev, userMobile: e.target.value }))
         },
         {
             label: "Date of birth",
+            title: "userDOB",
             type: 'date',
             max_limit: getMaxDate(),
             value: userFormData['userDOB'],
@@ -136,6 +140,7 @@ function useSignup(pageName) {
         },
         {
             label: "Gender",
+            title: "userGender",
             type: 'select',
             value: userFormData['userGender'],
             options: [
@@ -152,12 +157,14 @@ function useSignup(pageName) {
             children: [
                 {
                     type: "submit",
+                    title: "Signup",
                     value: 'Signup',
                     className: "ui-button ui-submit",
                     onClick: (e) => onUserSignup(e)
                 },
                 {
                     type: 'reset',
+                    title: "Reset",
                     value: 'Reset',
                     className: "ui-button ui-reset",
                     onClick: () => setUserFormData(initialFormData.current)
