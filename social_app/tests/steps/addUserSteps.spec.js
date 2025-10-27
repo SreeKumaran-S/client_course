@@ -3,7 +3,7 @@ import AddUserPage from '../page-object-model/AddUserPage';
 import { UserTaskAssert } from "../assertions/userTaskAsserts";
 import { URLS } from '../dom-selectors/selectors';
 
-test.describe("@addUser", () => {
+test.describe("@addPage", () => {
   test.describe.configure({ mode: 'serial' }); 
 
   test('fill, submit and redirect to homepage', async ({ page }) => {
@@ -11,8 +11,11 @@ test.describe("@addUser", () => {
     await addUserPage.gotoAddUserPage();
 
     await addUserPage.populateUserData();
-    await addUserPage.actionSignup();
-    let response = await page.waitForResponse(URLS.userUrl());
+    let [response] = await Promise.all([
+      page.waitForResponse(resp => resp.url().includes(URLS.userUrl())),
+      addUserPage.actionSignup()
+    ]);
+   
     await UserTaskAssert.isPostUserApiSuccess(response);
     await page.waitForURL(addUserPage.homePageUrl);
     await UserTaskAssert.isHomePage(page);

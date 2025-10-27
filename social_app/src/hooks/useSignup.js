@@ -63,7 +63,7 @@ function useSignup(pageName) {
         let invalidFields = validateUserData(userName, userEmail, userMobile, userDOB, userGender);
 
         if (invalidFields.length === 0) {
-            let user = { userId, userName, userEmail, userMobile, userDOB, userGender };
+            let user = { id: userId, userName, userEmail, userMobile, userDOB, userGender };
 
             if (pageName === constants.ADD_USER_PAGE) {
                 let callback = {
@@ -81,7 +81,7 @@ function useSignup(pageName) {
                 addUserInDb(callback, user);                 // Create operation
             }
             else if (pageName === constants.UPDATE_USER_PAGE) {
-                let { userId, ...userObjectToUpdate } = user;
+                let { id, ...userObjectToUpdate } = user;
                 let callback = {
                     success: (resp) => {
                         notify("Yaay updated your data in db !!", "ui-info");

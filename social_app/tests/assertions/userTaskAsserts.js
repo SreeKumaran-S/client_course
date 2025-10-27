@@ -8,6 +8,9 @@ export const UserTaskAssert = {
     async isAddUserPage(page){
         expect(page.url()).toContain(URLS.addUser());
     },
+    async isUpdateUserPage(page){
+        expect(page.url()).toContain(URLS.updateUser());
+    },
 
     async checkUserFieldsAreEmpty(page) {
         await expect(page.getByTitle(SELECTORS.userName)).toHaveValue('');
@@ -37,6 +40,11 @@ export const UserTaskAssert = {
         await expect(notifyComp).toHaveText(SELECTORS.dataDeletedInDb);
     },
 
+    async isNotifyDataUpdatedInDb(page){
+        let notifyComp = await page.getByTestId(SELECTORS.notificationComp);
+        await expect(notifyComp).toHaveText(SELECTORS.dataUpdateInDb);
+    },
+
     async isAddUserBtnVisible(page){
         let addUserBtn = page.getByTitle(SELECTORS.addUsers);
         await expect(addUserBtn).toBeVisible();
@@ -47,6 +55,13 @@ export const UserTaskAssert = {
         await expect(usersTable).toBeVisible();
     },
 
+    async validateUpdateLoadedFields(page, expectedFields){
+        await expect(page.getByTitle(SELECTORS.userName)).toHaveValue(expectedFields.userName);
+        await expect(page.getByTitle(SELECTORS.userEmail)).toHaveValue(expectedFields.userEmail);
+        await expect(page.getByTitle(SELECTORS.userMobile)).toHaveValue(expectedFields.userMobile);
+        await expect(page.getByTitle(SELECTORS.userDOB)).toHaveValue(expectedFields.userDOB);
+        await expect(page.getByTitle(SELECTORS.userGender)).toHaveValue(expectedFields.userGender);
+    }
 }
 
 

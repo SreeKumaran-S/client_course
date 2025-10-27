@@ -1,18 +1,19 @@
 import { SELECTORS, URLS } from '../dom-selectors/selectors';
-export default function AddUserPage(page) {
+export default function HomePage(page) {
     let homePageUrl = new URL(URLS.home(), URLS.host()).toString();
     let addUserPageUrl = new URL(URLS.addUser(), URLS.host()).toString();
 
     return {
         homePageUrl,
         addUserPageUrl,
-
+        
         async gotoHomePage() {
             await page.goto(homePageUrl);
         },
         async gotoAddUserPage() {
             await page.goto(addUserPageUrl);
         },
+      
         async actionGotoAddUserPage() {
             page.getByTitle(SELECTORS.addUsers).click();
         },
@@ -33,6 +34,16 @@ export default function AddUserPage(page) {
         async updateBtnClickBasedOnUserEmail(userEmail) {
             const row = page.locator('tr').filter({ hasText: userEmail });
             await row.getByRole('button', { name: 'Update' }).click();
+        },
+        
+        async modifyUserName(){
+           await page.getByTitle(SELECTORS.userName).fill("baasha");
+        },
+        async modifyUserMobile(){
+            await page.getByTitle(SELECTORS.userMobile).fill("+919999999990");
+        },
+        async actionSignup(){
+            page.getByTitle(SELECTORS.signup).click();
         }
     }
 }
